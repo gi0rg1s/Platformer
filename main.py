@@ -13,6 +13,10 @@ FPS = 60
 # -------------------- PLAYER CLASS --------------------
 class Player:
     def __init__(self, x, y):
+        self.y = y
+        self.x = x
+        self.height = 300
+
         #carica sprite
         self.image = pygame.image.load("Sprite/Sprite.png").convert_alpha()
         self.rect = self.image.get_rect()
