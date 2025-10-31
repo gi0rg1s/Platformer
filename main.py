@@ -2,6 +2,8 @@
 # ------- TO-DO ------
 # - background set-up
 # - character set-up
+# - character jumping
+# - background sliding
 
 import pygame
 pygame.init()
@@ -21,12 +23,13 @@ class Player:
         self.image = pygame.image.load("Sprite/Sprite.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+
         #ingradisci sprite
         self.image = pygame.transform.scale(self.image, (self.rect.width * 3, self.rect.height * 3))
 
         # variabili movimento
         self.velocity_y = 0
-        self.jump = False
+        self.is_jump = False
         self.on_ground = False
 
     def draw(self, screen):
@@ -46,7 +49,7 @@ class Player:
     def jump(self):
         if self.on_ground:
             self.velocity_y = -15
-            self.jump = True
+            self.is_jump = True
             self.on_ground = False
 
 def main():
@@ -64,7 +67,7 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.on_ground == True:
-                    player.jump
+                    player.jump()
 
         player.update()
 
