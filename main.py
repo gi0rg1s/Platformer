@@ -17,10 +17,9 @@ class Player:
     def __init__(self, x, y):
         self.y = y
         self.x = x
-        self.height = 300
-
-        #carica sprite
+        # carica e scala lo sprite subito, così il rect rispecchia la dimensione disegnata
         self.image = pygame.image.load("Sprite/Sprite.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.image.get_rect().width * 3, self.image.get_rect().height * 3))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
@@ -30,7 +29,11 @@ class Player:
         # variabili movimento
         self.velocity_y = 0
         self.is_jump = False
-        self.on_ground = False
+        # inizializza on_ground correttamente se il player parte per terra
+        self.on_ground = (self.y + self.height >= SCREEN_HEIGHT)
+        if self.on_ground:
+            self.y = SCREEN_HEIGHT - self.height
+            self.velocity_y = 0
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -45,6 +48,8 @@ class Player:
             self.y = SCREEN_HEIGHT - self.height
             self.velocity_y = 0
             self.on_ground = True
+        # keep rect in sync with logical position so draw() reflects movement
+        self.rect.topleft = (self.x, int(self.y))
 
     def jump(self):
         if self.on_ground:
