@@ -9,7 +9,7 @@ pygame.init()
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 600
 FPS = 60
-
+#AAAAAAAAAAAAAA
 # -------------------- PLAYER CLASS --------------------
 class Player:
     def __init__(self, x, y):
