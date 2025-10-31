@@ -2,16 +2,14 @@
 # ------- TO-DO ------
 # - background set-up
 # - character set-up
-# - character jumping
-# - background sliding
-#scusa devo commioiahdiurf
+
 import pygame
 pygame.init()
 
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 600
 FPS = 60
-#AAAAAAAAAAAAAA
+
 # -------------------- PLAYER CLASS --------------------
 class Player:
     def __init__(self, x, y):
@@ -22,9 +20,7 @@ class Player:
         self.image = pygame.transform.scale(self.image, (self.image.get_rect().width * 3, self.image.get_rect().height * 3))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-
-        #ingradisci sprite
-        self.image = pygame.transform.scale(self.image, (self.rect.width * 3, self.rect.height * 3))
+        self.height = self.rect.height
 
         # variabili movimento
         self.velocity_y = 0
