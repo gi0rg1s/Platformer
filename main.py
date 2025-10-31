@@ -4,7 +4,7 @@
 # - character set-up
 # - character jumping
 # - background sliding
-
+#scusa devo commitare
 import pygame
 pygame.init()
 
