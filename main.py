@@ -2,7 +2,9 @@
 # ------- TO-DO ------
 # - background set-up
 # - character set-up
-
+# - character jumping
+# - background sliding
+#scusa devo commioiahdiurf
 import pygame
 pygame.init()
 
@@ -20,7 +22,9 @@ class Player:
         self.image = pygame.transform.scale(self.image, (self.image.get_rect().width * 3, self.image.get_rect().height * 3))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.height = self.rect.height
+
+        #ingradisci sprite
+        self.image = pygame.transform.scale(self.image, (self.rect.width * 3, self.rect.height * 3))
 
         # variabili movimento
         self.velocity_y = 0
