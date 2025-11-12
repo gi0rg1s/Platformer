@@ -131,7 +131,7 @@ def main():
         player.update()
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
         hitbox.update(player.rect)
-
+        
         screen.fill((0, 0, 0))  # Clear the screen with black
         player.draw(screen)     # Draw the player
         # disegna la hitbox (verde) per verificare il posizionamento
