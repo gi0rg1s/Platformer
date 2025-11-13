@@ -5,7 +5,6 @@
 # DINOUSAUR GAME FROM CHROME
 
 import pygame
-import time
 import random
 pygame.init()
 
@@ -127,7 +126,7 @@ def main():
                 obstacles.append(Obstacle(x, y, w, h))
             
                     
-
+        
         player.update()
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
         hitbox.update(player.rect)
@@ -140,7 +139,7 @@ def main():
         for obs in list(obstacles):
             obs.run()
             obs.draw(screen)
-            if collisions := [o for o in obstacles if hitbox.rect.colliderect(o.rect)]:
+            if collision := [o for o in obstacles if hitbox.rect.colliderect(o.rect)]:
                 print("AAAAAAAAA!")
                 collision = True
                 if collision == True:
@@ -148,6 +147,9 @@ def main():
         # remove obstacles that moved o
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
+        score = pygame.time.get_ticks()  # Score based on time survived
+        text = pygame.font.SysFont(None, 36).render(f"Score: {score // 100}", True, (255, 255, 255))
+        screen.blit(text, (1250, 50))  # Draw score at top-left corner
 
         # flip once per frame
         pygame.display.flip() # Update the display
