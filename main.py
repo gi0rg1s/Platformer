@@ -4,6 +4,7 @@
 # - character set-up
 # DINOUSAUR GAME FROM CHROME
 
+from turtle import Screen
 import pygame
 import time
 import random
@@ -89,8 +90,19 @@ class Obstacle:
     def run(self):
         self.rect.x += self.velocity_x
 
+def menu():
+    welcome_text = pygame.font.SysFont(None,36).render(f"Welcome to the Platformer!", True, (255,255,255))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen.blit(welcome_text, (200, 100))
+    button = pygame.Rect(200, 200, 100, 50)
+    pygame.draw.rect((255, 255, 255), button)
 
-def main():
+    
+
+    play_mode()
+
+
+def play_mode():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer Project")
     clock = pygame.time.Clock()
@@ -153,5 +165,6 @@ def main():
         pygame.display.flip() # Update the display
 
 if __name__ == "__main__":
-    main()
+    menu()
     pygame.quit()
+
