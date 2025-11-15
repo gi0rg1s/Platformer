@@ -1,4 +1,6 @@
 # --------------------------- PLATFORMER PROJECT ----------------------------
+#By Manuel Gizzi and Giorgia Folloni
+#Music and Sounds By Gibbo
 # ------- TO-DO ------
 # - background set-up
 # - character set-up - - almost done
@@ -8,6 +10,7 @@ import pygame
 import random
 import sys
 pygame.init()
+pygame.mixer.init()
 
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 600
@@ -90,6 +93,9 @@ class Obstacle:
         self.rect.x += self.velocity_x
 
 def menu():
+    pygame.mixer.music.load("Music/MenuMusic.wav")
+    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.play(-1)  # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Menu")
     clock = pygame.time.Clock()
@@ -106,6 +112,12 @@ def menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button.collidepoint(event.pos):
+                    pygame.mixer.music.stop()
+                    pygame.mixer.music.unload()
+                    pygame.mixer.music.load("Music/StartSound.wav")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_volume(0.05)
+                    pygame.time.delay(700)  # wait for the start sound to finish
                     # start game loop; when it returns, exit menu
                     play_mode()
                     running = False
@@ -119,12 +131,16 @@ def menu():
 
 
 def play_mode():
+    pygame.mixer.music.load("Music/BackgroundMusic.wav")
+    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.play(-1)  # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer Project")
     clock = pygame.time.Clock()
 
     collision = False
     player = Player(100, 300)
+    
     # crea la hitbox con le misure che hai scritto (precise)
     hitbox = Hitbox(player.x, player.y, 15, 80)
     # list to hold multiple obstacles
@@ -162,13 +178,15 @@ def play_mode():
         
         screen.fill((0, 0, 0))  # Clear the screen with black
         player.draw(screen)     # Draw the player
+        
         # disegna la hitbox (verde) per verificare il posizionamento
         #hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
             obs.draw(screen)
-            if collision := [o for o in obstacles if hitbox.rect.colliderect(o.rect)]:
+            # check collision with the current obstacle
+            if hitbox.rect.colliderect(obs.rect):
                 print("AAAAAAAAA!")
                 running = False  # end game on collision
         # remove obstacles that moved
@@ -177,6 +195,8 @@ def play_mode():
         score = pygame.time.get_ticks()  # Score based on time survived
         text = pygame.font.SysFont(None, 36).render(f"Score: {score // 100}", True, (255, 255, 255))
         screen.blit(text, (1250, 50))  # Draw score at top-left corner
+        
+        
 
         # flip once per frame
         pygame.display.flip() # Update the display
