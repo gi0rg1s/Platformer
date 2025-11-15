@@ -4,9 +4,9 @@
 # - character set-up
 # DINOUSAUR GAME FROM CHROME
 
-from turtle import Screen
 import pygame
 import random
+import sys
 pygame.init()
 
 SCREEN_WIDTH = 1400
@@ -90,15 +90,32 @@ class Obstacle:
         self.rect.x += self.velocity_x
 
 def menu():
-    welcome_text = pygame.font.SysFont(None,36).render(f"Welcome to the Platformer!", True, (255,255,255))
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    screen.blit(welcome_text, (200, 100))
-    button = pygame.Rect(200, 200, 100, 50)
-    pygame.draw.rect((255, 255, 255), button)
+    pygame.display.set_caption("Menu")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 36)
+    title = font.render("Welcome to the Platformer!", True, (255, 255, 255))
+    btn_text = font.render("Play", True, (0, 0, 0))
+    button = pygame.Rect((SCREEN_WIDTH // 2) - 50, (SCREEN_HEIGHT // 2) + 40, 100, 50)
 
-    
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if button.collidepoint(event.pos):
+                    # start game loop; when it returns, exit menu
+                    play_mode()
+                    running = False
 
-    play_mode()
+        screen.fill((0, 0, 0))
+        screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
+        pygame.draw.rect(screen, (0, 255, 0), button)
+        screen.blit(btn_text, btn_text.get_rect(center=button.center))
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def play_mode():
@@ -146,16 +163,14 @@ def play_mode():
         screen.fill((0, 0, 0))  # Clear the screen with black
         player.draw(screen)     # Draw the player
         # disegna la hitbox (verde) per verificare il posizionamento
-        hitbox.draw(screen)
+        #hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
             obs.draw(screen)
             if collision := [o for o in obstacles if hitbox.rect.colliderect(o.rect)]:
                 print("AAAAAAAAA!")
-                collision = True
-                if collision == True:
-                    running = False
+                running = False  # end game on collision
         # remove obstacles that moved o
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
