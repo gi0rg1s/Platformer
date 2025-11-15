@@ -1,7 +1,7 @@
 # --------------------------- PLATFORMER PROJECT ----------------------------
 # ------- TO-DO ------
 # - background set-up
-# - character set-up
+# - character set-up - - almost done
 # DINOUSAUR GAME FROM CHROME
 
 import pygame
@@ -145,7 +145,7 @@ def main():
                 collision = True
                 if collision == True:
                     running = False
-        # remove obstacles that moved o
+        # remove obstacles that moved
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
 
