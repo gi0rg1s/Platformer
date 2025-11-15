@@ -5,8 +5,8 @@
 # DINOUSAUR GAME FROM CHROME
 
 import pygame
-import time
 import random
+import sys
 pygame.init()
 
 SCREEN_WIDTH = 1400
@@ -89,8 +89,36 @@ class Obstacle:
     def run(self):
         self.rect.x += self.velocity_x
 
+def menu():
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Menu")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 36)
+    title = font.render("Welcome to the Platformer!", True, (255, 255, 255))
+    btn_text = font.render("Play", True, (0, 0, 0))
+    button = pygame.Rect((SCREEN_WIDTH // 2) - 50, (SCREEN_HEIGHT // 2) + 40, 100, 50)
 
-def main():
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if button.collidepoint(event.pos):
+                    # start game loop; when it returns, exit menu
+                    play_mode()
+                    running = False
+
+        screen.fill((0, 0, 0))
+        screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
+        pygame.draw.rect(screen, (0, 255, 0), button)
+        screen.blit(btn_text, btn_text.get_rect(center=button.center))
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def play_mode():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer Project")
     clock = pygame.time.Clock()
@@ -127,7 +155,7 @@ def main():
                 obstacles.append(Obstacle(x, y, w, h))
             
                     
-
+        
         player.update()
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
         hitbox.update(player.rect)
@@ -135,23 +163,25 @@ def main():
         screen.fill((0, 0, 0))  # Clear the screen with black
         player.draw(screen)     # Draw the player
         # disegna la hitbox (verde) per verificare il posizionamento
-        hitbox.draw(screen)
+        #hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
             obs.draw(screen)
-            if collisions := [o for o in obstacles if hitbox.rect.colliderect(o.rect)]:
+            if collision := [o for o in obstacles if hitbox.rect.colliderect(o.rect)]:
                 print("AAAAAAAAA!")
-                collision = True
-                if collision == True:
-                    running = False
+                running = False  # end game on collision
         # remove obstacles that moved
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
+        score = pygame.time.get_ticks()  # Score based on time survived
+        text = pygame.font.SysFont(None, 36).render(f"Score: {score // 100}", True, (255, 255, 255))
+        screen.blit(text, (1250, 50))  # Draw score at top-left corner
 
         # flip once per frame
         pygame.display.flip() # Update the display
 
 if __name__ == "__main__":
-    main()
+    menu()
     pygame.quit()
+
