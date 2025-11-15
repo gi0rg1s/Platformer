@@ -75,6 +75,7 @@ class Player:
 
     def jump(self):
         if self.on_ground:
+            pygame.mixer.Sound("Music/JumpSound.wav").play().set_volume(0.08)
             self.velocity_y = -15
             self.is_jump = True
             self.on_ground = False
@@ -132,7 +133,7 @@ def menu():
 
 def play_mode():
     pygame.mixer.music.load("Music/BackgroundMusic.wav")
-    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.set_volume(0.04)
     pygame.mixer.music.play(-1)  # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer Project")
