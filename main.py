@@ -161,7 +161,7 @@ def play_mode():
     hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
-
+    
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
     pygame.time.set_timer(SPAWN_OBSTACLE, 2000)
