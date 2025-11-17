@@ -42,8 +42,8 @@ class Player:
         self.y = y
         self.x = x
         # carica e scala lo sprite subito, così il rect rispecchia la dimensione disegnata
-        self.image = pygame.image.load("Sprite/Sprite.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.image.get_rect().width * 3, self.image.get_rect().height * 3))
+        self.image = pygame.image.load("Sprite/Sprite.gif").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.image.get_rect().width /2, self.image.get_rect().height /2 ))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.height = self.rect.height
@@ -211,8 +211,6 @@ def play_mode():
                 # Riavvia il timer con il nuovo intervallo
                 pygame.time.set_timer(SPAWN_OBSTACLE, 0)  # Disabilita temporaneamente
                 pygame.time.set_timer(SPAWN_OBSTACLE, current_spawn_interval)
-            
-            print(f"Difficulty increased! Speed: {current_speed_multiplier:.1f}x, Spawn interval: {current_spawn_interval}ms")
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
