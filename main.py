@@ -103,7 +103,7 @@ class Obstacle:
 def menu():
     pygame.mixer.music.load("Music/MenuMusic.wav")
     pygame.mixer.music.set_volume(0.05)
-    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+    pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Menu")
     clock = pygame.time.Clock()
@@ -141,7 +141,7 @@ def menu():
 def lose_display(score):
     pygame.mixer.music.load("Music/MenuMusic.wav")
     pygame.mixer.music.set_volume(0.05)
-    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+    pygame.mixer.music.play(-1)                                                      # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
@@ -157,7 +157,7 @@ def lose_display(score):
 def play_mode():
     pygame.mixer.music.load("Music/BackgroundMusic.wav")
     pygame.mixer.music.set_volume(0.04)
-    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+    pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer Project")
     clock = pygame.time.Clock()
@@ -165,7 +165,7 @@ def play_mode():
     collision = False
     player = Player(100, 300)
     
-    # crea la hitbox con le misure che hai scritto (precise)
+    # create a hitbox for collisions
     hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
@@ -207,7 +207,7 @@ def play_mode():
             
             # Riduci l'intervallo di spawn per aumentare la frequenza
             if current_spawn_interval > min_spawn_interval:
-                current_spawn_interval = max(min_spawn_interval, base_spawn_interval - (current_score_units * 10))
+                current_spawn_interval = max(min_spawn_interval, base_spawn_interval - current_score_units)
                 # Riavvia il timer con il nuovo intervallo
                 pygame.time.set_timer(SPAWN_OBSTACLE, 0)  # Disabilita temporaneamente
                 pygame.time.set_timer(SPAWN_OBSTACLE, current_spawn_interval)
