@@ -1,7 +1,7 @@
 # --------------------------- PLATFORMER PROJECT ----------------------------
 #By Manuel Gizzi and Giorgia Folloni
 #Music and Sounds By Gibbo
-# ------- TO-DO ------
+# ------- TO-DO ------3
 # - background set-up
 # - character set-up - - almost done
 # DINOUSAUR GAME FROM CHROME
@@ -76,7 +76,7 @@ class Player:
     def jump(self):
         if self.on_ground:
             pygame.mixer.Sound("Music/JumpSound.wav").play().set_volume(0.08)
-            self.velocity_y = -15
+            self.velocity_y = -10
             self.is_jump = True
             self.on_ground = False
         
@@ -130,6 +130,20 @@ def menu():
         pygame.display.flip()
         clock.tick(FPS)
 
+def lose_display(score):
+    pygame.mixer.music.load("Music/MenuMusic.wav")
+    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 36)
+    lose_str = font.render("Game Over! Your score is : " + str(score) + "!", True, (255, 255, 255))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen.fill((0, 0, 0))
+    screen.blit(lose_str, lose_str.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
+    pygame.display.flip()
+    menu()
+
 
 def play_mode():
     pygame.mixer.music.load("Music/BackgroundMusic.wav")
@@ -143,7 +157,7 @@ def play_mode():
     player = Player(100, 300)
     
     # crea la hitbox con le misure che hai scritto (precise)
-    hitbox = Hitbox(player.x, player.y, 15, 80)
+    hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
 
@@ -166,13 +180,13 @@ def play_mode():
             if event.type == SPAWN_OBSTACLE:
                 # spawn at right edge, random height/size (you can change values)
                 w = random.randint(30, 60)
-                h = random.randint(30, 80)
-                x = SCREEN_WIDTH + 10
+                h = random.randint(30, 50)
+                x = SCREEN_WIDTH - 50
                 y = SCREEN_HEIGHT - h
                 obstacles.append(Obstacle(x, y, w, h))
-            
+    
                     
-        
+            
         player.update()
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
         hitbox.update(player.rect)
@@ -181,7 +195,7 @@ def play_mode():
         player.draw(screen)     # Draw the player
         
         # disegna la hitbox (verde) per verificare il posizionamento
-        #hitbox.draw(screen)
+        hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
@@ -189,11 +203,15 @@ def play_mode():
             # check collision with the current obstacle
             if hitbox.rect.colliderect(obs.rect):
                 print("AAAAAAAAA!")
-                running = False  # end game on collision
+                lose_display(score)  # end game on collision
+            if (score // 100) > parametro:  
+                obs.velocity_x  += velocity
         # remove obstacles that moved
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
-        score = pygame.time.get_ticks()  # Score based on time survived
+        score = (pygame.time.get_ticks() - 10)  # Score based on time survived
+        parametro = 100
+        velocity = -0.025 
         text = pygame.font.SysFont(None, 36).render(f"Score: {score // 100}", True, (255, 255, 255))
         screen.blit(text, (1250, 50))  # Draw score at top-left corner
         
