@@ -1,7 +1,7 @@
 # --------------------------- PLATFORMER PROJECT ----------------------------
 #By Manuel Gizzi and Giorgia Folloni
 #Music and Sounds By Gibbo
-# ------- TO-DO ------3
+# ------- TO-DO ------
 # - background set-up
 # - character set-up - - almost done
 # DINOUSAUR GAME FROM CHROME
@@ -19,7 +19,7 @@ FPS = 60
 alive = True
 collision = False
 
-# -------------------- PLAYER CLASS --------------------
+# -------------------- HITBOX CLASS --------------------
 class Hitbox:
     def __init__(self, x, y, width, height):
         # store size so we can re-center relative to the player each frame
@@ -36,7 +36,7 @@ class Hitbox:
         self.rect.size = (self.width, self.height)
         self.rect.center = player_rect.center
 
-
+#----------------------PLAYER CLASS-----------------------
 class Player:
     def __init__(self, x, y):
         self.y = y
@@ -80,19 +80,26 @@ class Player:
             self.is_jump = True
             self.on_ground = False
         
+#---------------OBSTACLE CLASS------------------
 class Obstacle:
     
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, base_speed=-5):
         self.rect = pygame.Rect(x, y, width, height)
         # velocity in pixels per frame (negative to move left)
-        self.velocity_x = -5
+        self.base_speed = base_speed
+        self.velocity_x = base_speed
 
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 0, 0), self.rect)
 
     def run(self):
         self.rect.x += self.velocity_x
+        
+    def update_speed(self, speed_multiplier):
+        # Aggiorna la velocità mantenendo la direzione originale
+        self.velocity_x = self.base_speed * speed_multiplier
 
+#---------------------MENU FUNCTION-----------------------
 def menu():
     pygame.mixer.music.load("Music/MenuMusic.wav")
     pygame.mixer.music.set_volume(0.05)
@@ -130,6 +137,7 @@ def menu():
         pygame.display.flip()
         clock.tick(FPS)
 
+#----------------------------LOSE DISPLAY----------------------------
 def lose_display(score):
     pygame.mixer.music.load("Music/MenuMusic.wav")
     pygame.mixer.music.set_volume(0.05)
@@ -145,7 +153,7 @@ def lose_display(score):
     pygame.time.wait(3000)
     menu()
 
-
+#------------------------PLAY MODE------------------------------
 def play_mode():
     pygame.mixer.music.load("Music/BackgroundMusic.wav")
     pygame.mixer.music.set_volume(0.04)
@@ -161,15 +169,22 @@ def play_mode():
     hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
-    
+
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
 
-    parametro = 100
-    velocity = -0.25            # variazione di velocità da applicare agli ostacoli
-    spawn_interval_ms = 2000   # intervallo spawn (ms) positivo e intero
+    # Variabili per il sistema di difficoltà progressiva
+    base_obstacle_speed = -5
+    current_speed_multiplier = 1.0
+    last_speed_increase_score = 0
+    speed_increase_interval = 100  # Aumenta la velocità ogni 100 punti
+    
+    # Variabili per lo spawn dinamico
+    base_spawn_interval = 2000  # 2 secondi base
+    current_spawn_interval = base_spawn_interval
+    min_spawn_interval = 800   # Intervallo minimo di spawn
 
-    pygame.time.set_timer(SPAWN_OBSTACLE, spawn_interval_ms)
+    pygame.time.set_timer(SPAWN_OBSTACLE, current_spawn_interval)
     game_start_time = pygame.time.get_ticks()
     running = True
 
@@ -178,6 +193,27 @@ def play_mode():
         clock.tick(FPS)
         current_time = pygame.time.get_ticks()
         score = (current_time - game_start_time)
+        current_score_units = score // 100
+        
+        # AUMENTO DIFFICOLTÀ PROGRESSIVO
+        # Aumenta la velocità ogni 100 punti
+        if current_score_units > last_speed_increase_score and current_score_units % speed_increase_interval == 0:
+            last_speed_increase_score = current_score_units
+            current_speed_multiplier += 0.1  # Aumenta del 10% ogni 100 punti
+            
+            # Aggiorna la velocità di tutti gli ostacoli esistenti
+            for obs in obstacles:
+                obs.update_speed(current_speed_multiplier)
+            
+            # Riduci l'intervallo di spawn per aumentare la frequenza
+            if current_spawn_interval > min_spawn_interval:
+                current_spawn_interval = max(min_spawn_interval, base_spawn_interval - (current_score_units * 10))
+                # Riavvia il timer con il nuovo intervallo
+                pygame.time.set_timer(SPAWN_OBSTACLE, 0)  # Disabilita temporaneamente
+                pygame.time.set_timer(SPAWN_OBSTACLE, current_spawn_interval)
+            
+            print(f"Difficulty increased! Speed: {current_speed_multiplier:.1f}x, Spawn interval: {current_spawn_interval}ms")
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -191,9 +227,10 @@ def play_mode():
                 h = random.randint(30, 50)
                 x = SCREEN_WIDTH - 50
                 y = SCREEN_HEIGHT - h
-                obstacles.append(Obstacle(x, y, w, h))
-    
-                    
+                # Crea ostacolo con la velocità corrente
+                new_obstacle = Obstacle(x, y, w, h, base_obstacle_speed)
+                new_obstacle.update_speed(current_speed_multiplier)
+                obstacles.append(new_obstacle)            
             
         player.update()
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
@@ -211,24 +248,19 @@ def play_mode():
             # check collision with the current obstacle
             if hitbox.rect.colliderect(obs.rect):
                 lose_display(score)  # end game on collision
-            if (score // 100) >= parametro:  
-                obs.velocity_x  += velocity
-                parametro += 100
-        # remove obstacles that moved
-        # ff-screen to the left
+        
+        # remove obstacles that moved off-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
         
-        
-         
+        # Mostra anche il moltiplicatore di velocità
         text = pygame.font.SysFont(None, 36).render(f"Score: {score // 100}", True, (255, 255, 255))
-        screen.blit(text, (1250, 50))  # Draw score at top-left corner
+        speed_text = pygame.font.SysFont(None, 36).render(f"Speed: {current_speed_multiplier:.1f}x", True, (255, 255, 255))
+        screen.blit(text, (1250, 50))
+        screen.blit(speed_text, (1250, 90))
         
-        
-
         # flip once per frame
         pygame.display.flip() # Update the display
 
 if __name__ == "__main__":
     menu()
     pygame.quit()
-
