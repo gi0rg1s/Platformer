@@ -137,11 +137,12 @@ def lose_display(score):
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
-    lose_str = font.render("Game Over! Your score is : " + str(score) + "!", True, (255, 255, 255))
+    lose_str = font.render("Game Over! Your score is : " + str(score//100) + "!", True, (255, 255, 255))
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     screen.fill((0, 0, 0))
     screen.blit(lose_str, lose_str.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
     pygame.display.flip()
+    pygame.time.wait(3000)
     menu()
 
 
@@ -164,12 +165,17 @@ def play_mode():
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
     pygame.time.set_timer(SPAWN_OBSTACLE, 2000)
-
+    game_start_time = pygame.time.get_ticks()
     running = True
+
     while running:
         # cap the frame rate but do not block while waiting for spawns
         clock.tick(FPS)
+        current_time = pygame.time.get_ticks()
+        score = (current_time - game_start_time) // 10 
 
+        parametro = 100
+        velocity = -0.025
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -195,7 +201,7 @@ def play_mode():
         player.draw(screen)     # Draw the player
         
         # disegna la hitbox (verde) per verificare il posizionamento
-        hitbox.draw(screen)
+        #hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
@@ -209,9 +215,9 @@ def play_mode():
         # remove obstacles that moved
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
-        score = (pygame.time.get_ticks() - 10)  # Score based on time survived
-        parametro = 100
-        velocity = -0.025 
+        
+        
+         
         text = pygame.font.SysFont(None, 36).render(f"Score: {score // 100}", True, (255, 255, 255))
         screen.blit(text, (1250, 50))  # Draw score at top-left corner
         
