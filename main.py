@@ -164,7 +164,12 @@ def play_mode():
     
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
-    pygame.time.set_timer(SPAWN_OBSTACLE, 2000)
+
+    parametro = 100
+    velocity = -0.25            # variazione di velocità da applicare agli ostacoli
+    spawn_interval_ms = 2000   # intervallo spawn (ms) positivo e intero
+
+    pygame.time.set_timer(SPAWN_OBSTACLE, spawn_interval_ms)
     game_start_time = pygame.time.get_ticks()
     running = True
 
@@ -172,10 +177,7 @@ def play_mode():
         # cap the frame rate but do not block while waiting for spawns
         clock.tick(FPS)
         current_time = pygame.time.get_ticks()
-        score = (current_time - game_start_time) // 10 
-
-        parametro = 100
-        velocity = -0.025
+        score = (current_time - game_start_time)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -208,10 +210,10 @@ def play_mode():
             obs.draw(screen)
             # check collision with the current obstacle
             if hitbox.rect.colliderect(obs.rect):
-                print("AAAAAAAAA!")
                 lose_display(score)  # end game on collision
-            if (score // 100) > parametro:  
+            if (score // 100) >= parametro:  
                 obs.velocity_x  += velocity
+                parametro += 100
         # remove obstacles that moved
         # ff-screen to the left
         obstacles = [o for o in obstacles if o.rect.right > 0]
