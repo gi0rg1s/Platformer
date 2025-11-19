@@ -272,14 +272,18 @@ def lose_display(score):
 
 #------------------------PLAY MODE------------------------------
 def play_mode():
-    pygame.mixer.music.load("Music/BackgroundMusic.wav")
-    pygame.mixer.music.set_volume(0.04)
-    pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Jojo Runner")
     clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 36)
+    str = font.render("Help me to avoid flowers!", True, (255, 255, 255))
+    screen.blit(str, (550, 100))
+    pygame.display.flip()
+    pygame.time.wait(2000)
+    pygame.mixer.music.load("Music/BackgroundMusic.wav")
+    pygame.mixer.music.set_volume(0.04)
+    pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
 
-    collision = False
     player = Player(100, 300)
     
     # create a hitbox for collisions
