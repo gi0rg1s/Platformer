@@ -9,13 +9,15 @@
 import pygame
 import random
 import sys
-import os
 pygame.init()
 pygame.mixer.init()
 
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 600
 FPS = 60
+# fixed obstacle size so only texture changes between obstacles
+OBSTACLE_WIDTH = 50
+OBSTACLE_HEIGHT = 70
 
 alive = True
 collision = False
@@ -193,6 +195,10 @@ class Obstacle:
         else:
             self.rect = pygame.Rect(x, y, width, height)
 
+        # associate a hitbox rect with this obstacle (separate object so we can tweak it independently)
+        # start with the same rect as the visual rect
+        self.hitbox = self.rect.copy()
+
     def draw(self, screen):
         if self.image:
             screen.blit(self.image, self.rect)
@@ -202,6 +208,8 @@ class Obstacle:
     def run(self):
         # velocity_x might be float; update rect.x with int increment
         self.rect.x += int(self.velocity_x)
+        # keep hitbox synced to the visual rect (only position matters here)
+        self.hitbox.topleft = self.rect.topleft
         
     def update_speed(self, speed_multiplier):
         # Aggiorna la velocità mantenendo la direzione originale
@@ -278,13 +286,12 @@ def play_mode():
     hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
-    # gather obstacle sprites from the `Sprite` directory (if present)
-    sprite_dir = os.path.join(os.getcwd(), "Sprite")
-    obstacle_images = []
-    if os.path.isdir(sprite_dir):
-        for f in os.listdir(sprite_dir):
-            if f.lower().endswith((".png", ".jpg", ".bmp", ".gif")):
-                obstacle_images.append(os.path.join(sprite_dir, f))
+    # use the explicit list of obstacle textures provided by the user
+    obstacle_images = [
+        "Sprite/obstacle1.png",
+        "Sprite/obstacle2.png",
+        "Sprite/obstacle3.png",
+    ]
 
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
@@ -339,14 +346,14 @@ def play_mode():
                     player.press_jump()
             # handle the spawn event without blocking the main loop
             if event.type == SPAWN_OBSTACLE:
-                # spawn at right edge, random height/size (you can change values)
-                w = random.randint(30, 60)
-                h = random.randint(30, 50)
+                # spawn at right edge using fixed size so only texture changes
+                w = OBSTACLE_WIDTH
+                h = OBSTACLE_HEIGHT
                 x = SCREEN_WIDTH - 50
                 y = SCREEN_HEIGHT - h
-                # choose a sprite image for the obstacle if any are available
+                # choose one of the obstacle textures (if available)
                 image_path = random.choice(obstacle_images) if obstacle_images else None
-                # Crea ostacolo con la velocità corrente
+                # Create obstacle with fixed size but with different texture
                 new_obstacle = Obstacle(x, y, w, h, base_obstacle_speed, image_path=image_path)
                 new_obstacle.update_speed(current_speed_multiplier)
                 obstacles.append(new_obstacle)            
@@ -370,8 +377,8 @@ def play_mode():
         for obs in list(obstacles):
             obs.run()
             obs.draw(screen)
-            # check collision with the current obstacle
-            if hitbox.rect.colliderect(obs.rect):
+            # check collision with the current obstacle using each obstacle's hitbox
+            if hitbox.rect.colliderect(obs.hitbox):
                 running = False
                 lose_display(score)  # end game on collision
         
