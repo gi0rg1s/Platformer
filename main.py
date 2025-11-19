@@ -376,7 +376,7 @@ def play_mode():
         player.draw(screen)     # Draw the player
         
         # disegna la hitbox (verde) per verificare il posizionamento
-        hitbox.draw(screen)
+        #hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
