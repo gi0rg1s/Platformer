@@ -85,18 +85,47 @@ class Player:
         screen.blit(self.image, self.rect)
 
     def update(self):
+        # time delta for timers
+        now = pygame.time.get_ticks()
+        if not hasattr(self, 'last_update_time'):
+            self.last_update_time = now
+        delta = now - self.last_update_time
+        self.last_update_time = now
+
+        # initialize timers if missing
+        if not hasattr(self, 'coyote_time'):
+            self.coyote_time = 100
+        if not hasattr(self, 'coyote_timer'):
+            self.coyote_timer = 0
+        if not hasattr(self, 'jump_buffer_time'):
+            self.jump_buffer_time = 150
+        if not hasattr(self, 'jump_buffer_timer'):
+            self.jump_buffer_timer = 0
+        if not hasattr(self, 'jump_strength'):
+            self.jump_strength = -10
+
+        # decrement timers
+        if self.coyote_timer > 0:
+            self.coyote_timer = max(0, self.coyote_timer - delta)
+        if self.jump_buffer_timer > 0:
+            self.jump_buffer_timer = max(0, self.jump_buffer_timer - delta)
 
         self.velocity_y += 0.5       # gravity
         self.y += self.velocity_y
 
+        prev_on_ground = self.on_ground
         self.on_ground = False
         if self.y + self.height >= SCREEN_HEIGHT:  # ground collision
             self.y = SCREEN_HEIGHT - self.height
             self.velocity_y = 0
             self.on_ground = True
+            # reset coyote timer when on ground
+            self.coyote_timer = self.coyote_time
+            # if there is a buffered jump, perform it immediately
+            if self.jump_buffer_timer > 0:
+                self.do_jump()
 
         # animation: advance frames only when on ground (walking)
-        now = pygame.time.get_ticks()
         if self.on_ground:
             if now - self.last_anim_time >= self.anim_delay:
                 self.anim_index = (self.anim_index + 1) % len(self.frames)
@@ -111,12 +140,36 @@ class Player:
         self.rect.topleft = (self.x, int(self.y))
         self.height = self.rect.height
 
+    def press_jump(self):
+        """Call when the player presses the jump key (buffers input)."""
+        # set buffer timer
+        if not hasattr(self, 'jump_buffer_time'):
+            self.jump_buffer_time = 150
+        self.jump_buffer_timer = self.jump_buffer_time
+        # try immediate jump if allowed (on ground or within coyote time)
+        if self.on_ground or (hasattr(self, 'coyote_timer') and self.coyote_timer > 0):
+            self.do_jump()
+
+    def do_jump(self):
+        # perform the actual jump
+        try:
+            if self.jump_sound:
+                self.jump_sound.play()
+        except Exception:
+            pass
+        if not hasattr(self, 'jump_strength'):
+            self.jump_strength = -10
+        self.velocity_y = self.jump_strength
+        self.is_jump = True
+        self.on_ground = False
+        # reset timers
+        self.coyote_timer = 0
+        self.jump_buffer_timer = 0
+
     def jump(self):
-        if self.on_ground:
-            pygame.mixer.Sound.play(self.jump_sound) if self.jump_sound else None
-            self.velocity_y = -10
-            self.is_jump = True
-            self.on_ground = False
+        # compatibility wrapper: try to jump immediately if allowed
+        if self.on_ground or (hasattr(self, 'coyote_timer') and self.coyote_timer > 0):
+            self.do_jump()
         
 #---------------OBSTACLE CLASS------------------
 class Obstacle:
@@ -165,8 +218,9 @@ def menu():
                     pygame.mixer.music.set_volume(0.05)
                     pygame.time.delay(700)  # wait for the start sound to finish
                     # start game loop; when it returns, exit menu
-                    play_mode()
                     running = False
+                    play_mode()
+                    
 
         screen.fill((0, 0, 0))
         screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
@@ -197,7 +251,7 @@ def play_mode():
     pygame.mixer.music.set_volume(0.04)
     pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Platformer Project")
+    pygame.display.set_caption("Jojo Runner")
     clock = pygame.time.Clock()
 
     collision = False
@@ -225,6 +279,7 @@ def play_mode():
     pygame.time.set_timer(SPAWN_OBSTACLE, current_spawn_interval)
     game_start_time = pygame.time.get_ticks()
     running = True
+    prev_space = False
 
     while running:
         # cap the frame rate but do not block while waiting for spawns
@@ -254,8 +309,9 @@ def play_mode():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and player.on_ground == True:
-                    player.jump()
+                if event.key == pygame.K_SPACE:
+                    # buffer the jump on keydown (will perform immediately if allowed)
+                    player.press_jump()
             # handle the spawn event without blocking the main loop
             if event.type == SPAWN_OBSTACLE:
                 # spawn at right edge, random height/size (you can change values)
@@ -268,6 +324,12 @@ def play_mode():
                 new_obstacle.update_speed(current_speed_multiplier)
                 obstacles.append(new_obstacle)            
             
+        # Also handle keyboard edge detection in case events are missed
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and not prev_space:
+            player.press_jump()
+        prev_space = keys[pygame.K_SPACE]
+
         player.update()
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
         hitbox.update(player.rect)
@@ -283,6 +345,7 @@ def play_mode():
             obs.draw(screen)
             # check collision with the current obstacle
             if hitbox.rect.colliderect(obs.rect):
+                running = False
                 lose_display(score)  # end game on collision
         
         # remove obstacles that moved off-screen to the left
