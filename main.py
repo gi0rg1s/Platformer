@@ -354,7 +354,7 @@ def play_mode():
                 w = OBSTACLE_WIDTH
                 h = OBSTACLE_HEIGHT
                 x = SCREEN_WIDTH - 50
-                y = SCREEN_HEIGHT - h
+                y = SCREEN_HEIGHT - h 
                 # choose one of the obstacle textures (if available)
                 image_path = random.choice(obstacle_images) if obstacle_images else None
                 # Create obstacle with fixed size but with different texture
