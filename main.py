@@ -38,20 +38,43 @@ class Hitbox:
 
 #----------------------PLAYER CLASS-----------------------
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x, y, scale=1, anim_delay=150):
         self.y = y
         self.x = x
-        # carica e scala lo sprite subito, così il rect rispecchia la dimensione disegnata
-        self.image = pygame.image.load("Sprite/Camminata1.png").convert_alpha()
-        
-        self.image = pygame.transform.scale(self.image, (self.image.get_rect().width * 3, self.image.get_rect().height * 3))
+
+        # Configuration: scale factor and animation timing (ms)
+        self.scale = scale
+        self.anim_delay = anim_delay
+
+        # load and scale animation frames
+        frame_paths = ["Sprite/Camminata1.png", "Sprite/Camminata2.png"]
+        self.frames = []
+        for path in frame_paths:
+            img = pygame.image.load(path).convert_alpha()
+            w, h = img.get_rect().size
+            img = pygame.transform.scale(img, (int(w * self.scale//2), int(h * self.scale//2)))
+            self.frames.append(img)
+
+        # initial image/frame
+        self.image = self.frames[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.height = self.rect.height
 
+        # animation state
+        self.anim_index = 0
+        self.last_anim_time = pygame.time.get_ticks()
+
         # variabili movimento
         self.velocity_y = 0
         self.is_jump = False
+        # load jump sound once (if available)
+        try:
+            self.jump_sound = pygame.mixer.Sound("Music/JumpSound.wav")
+            self.jump_sound.set_volume(0.08)
+        except Exception:
+            self.jump_sound = None
+
         # inizializza on_ground correttamente se il player parte per terra
         self.on_ground = (self.y + self.height >= SCREEN_HEIGHT)
         if self.on_ground:
@@ -63,7 +86,7 @@ class Player:
 
     def update(self):
 
-        self.velocity_y += 0.5       # gravity   
+        self.velocity_y += 0.5       # gravity
         self.y += self.velocity_y
 
         self.on_ground = False
@@ -71,12 +94,26 @@ class Player:
             self.y = SCREEN_HEIGHT - self.height
             self.velocity_y = 0
             self.on_ground = True
-        # keep rect in sync with logical position so draw() reflects movement
+
+        # animation: advance frames only when on ground (walking)
+        now = pygame.time.get_ticks()
+        if self.on_ground:
+            if now - self.last_anim_time >= self.anim_delay:
+                self.anim_index = (self.anim_index + 1) % len(self.frames)
+                self.image = self.frames[self.anim_index]
+                self.last_anim_time = now
+        else:
+            # keep a stable frame while in air
+            self.image = self.frames[0]
+
+        # update rect to match current image size and logical position
+        self.rect = self.image.get_rect()
         self.rect.topleft = (self.x, int(self.y))
+        self.height = self.rect.height
 
     def jump(self):
         if self.on_ground:
-            pygame.mixer.Sound("Music/JumpSound.wav").play().set_volume(0.08)
+            pygame.mixer.Sound.play(self.jump_sound) if self.jump_sound else None
             self.velocity_y = -10
             self.is_jump = True
             self.on_ground = False
@@ -239,7 +276,7 @@ def play_mode():
         player.draw(screen)     # Draw the player
         
         # disegna la hitbox (verde) per verificare il posizionamento
-        #hitbox.draw(screen)
+        hitbox.draw(screen)
         # update and draw all obstacles
         for obs in list(obstacles):
             obs.run()
