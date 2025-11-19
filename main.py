@@ -247,6 +247,8 @@ def lose_display(score):
 
 #------------------------PLAY MODE------------------------------
 def play_mode():
+    background = pygame.image.load("Sprite/background.png").convert()
+    background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.mixer.music.load("Music/BackgroundMusic.wav")
     pygame.mixer.music.set_volume(0.04)
     pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
@@ -261,6 +263,7 @@ def play_mode():
     hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
+    
 
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
@@ -287,6 +290,7 @@ def play_mode():
         current_time = pygame.time.get_ticks()
         score = (current_time - game_start_time)
         current_score_units = score // 100
+        screen.blit(background, (0, 0))
         
         # AUMENTO DIFFICOLTÀ PROGRESSIVO
         # Aumenta la velocità ogni 100 punti
@@ -335,7 +339,7 @@ def play_mode():
         # aggiorna la hitbox per seguirlo (centrata sul corpo)
         hitbox.update(player.rect)
         
-        screen.fill((0, 0, 0))  # Clear the screen with black
+       # screen.fill((0, 0, 0))  # Clear the screen with black
         player.draw(screen)     # Draw the player
         
         # disegna la hitbox (verde) per verificare il posizionamento
