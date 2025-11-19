@@ -42,7 +42,8 @@ class Player:
         self.y = y
         self.x = x
         # carica e scala lo sprite subito, così il rect rispecchia la dimensione disegnata
-        self.image = pygame.image.load("Sprite/Sprite.png").convert_alpha()
+        self.image = pygame.image.load("Sprite/Camminata1.png").convert_alpha()
+        
         self.image = pygame.transform.scale(self.image, (self.image.get_rect().width * 3, self.image.get_rect().height * 3))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
