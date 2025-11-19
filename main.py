@@ -317,6 +317,7 @@ def play_mode():
         if current_score_units > last_speed_increase_score and current_score_units % speed_increase_interval == 0:
             last_speed_increase_score = current_score_units
             current_speed_multiplier += 0.1  # Aumenta del 10% ogni 100 punti
+            pygame.mixer.Sound("Music/SpeedUp.wav").play().set_volume(0.05)
             
             # Aggiorna la velocità di tutti gli ostacoli esistenti
             for obs in obstacles:
