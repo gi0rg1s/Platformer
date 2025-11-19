@@ -9,6 +9,7 @@
 import pygame
 import random
 import sys
+import os
 pygame.init()
 pygame.mixer.init()
 
@@ -173,18 +174,34 @@ class Player:
         
 #---------------OBSTACLE CLASS------------------
 class Obstacle:
-    
-    def __init__(self, x, y, width, height, base_speed=-5):
-        self.rect = pygame.Rect(x, y, width, height)
+    def __init__(self, x, y, width, height, base_speed=-5, image_path=None):
         # velocity in pixels per frame (negative to move left)
         self.base_speed = base_speed
         self.velocity_x = base_speed
+        self.image = None
+
+        # If an image path is provided, attempt to load and scale it to the desired size
+        if image_path:
+            try:
+                img = pygame.image.load(image_path).convert_alpha()
+                img = pygame.transform.scale(img, (max(1, int(width)), max(1, int(height))))
+                self.image = img
+                self.rect = self.image.get_rect(topleft=(x, y))
+            except Exception:
+                # fallback to rect if image load fails
+                self.rect = pygame.Rect(x, y, width, height)
+        else:
+            self.rect = pygame.Rect(x, y, width, height)
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (255, 0, 0), self.rect)
+        if self.image:
+            screen.blit(self.image, self.rect)
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), self.rect)
 
     def run(self):
-        self.rect.x += self.velocity_x
+        # velocity_x might be float; update rect.x with int increment
+        self.rect.x += int(self.velocity_x)
         
     def update_speed(self, speed_multiplier):
         # Aggiorna la velocità mantenendo la direzione originale
@@ -261,6 +278,13 @@ def play_mode():
     hitbox = Hitbox(player.x - 20, player.y, 25, 80)
     # list to hold multiple obstacles
     obstacles = []
+    # gather obstacle sprites from the `Sprite` directory (if present)
+    sprite_dir = os.path.join(os.getcwd(), "Sprite")
+    obstacle_images = []
+    if os.path.isdir(sprite_dir):
+        for f in os.listdir(sprite_dir):
+            if f.lower().endswith((".png", ".jpg", ".bmp", ".gif")):
+                obstacle_images.append(os.path.join(sprite_dir, f))
 
     # create a custom event for spawning obstacles every 2000 milliseconds (2s)
     SPAWN_OBSTACLE = pygame.USEREVENT + 1
@@ -319,8 +343,10 @@ def play_mode():
                 h = random.randint(30, 50)
                 x = SCREEN_WIDTH - 50
                 y = SCREEN_HEIGHT - h
+                # choose a sprite image for the obstacle if any are available
+                image_path = random.choice(obstacle_images) if obstacle_images else None
                 # Crea ostacolo con la velocità corrente
-                new_obstacle = Obstacle(x, y, w, h, base_obstacle_speed)
+                new_obstacle = Obstacle(x, y, w, h, base_obstacle_speed, image_path=image_path)
                 new_obstacle.update_speed(current_speed_multiplier)
                 obstacles.append(new_obstacle)            
             
