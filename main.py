@@ -274,9 +274,6 @@ def lose_display(score):
 def play_mode():
     background = pygame.image.load("Sprite/background.png").convert()
     background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.mixer.music.load("Music/BackgroundMusic.wav")
-    pygame.mixer.music.set_volume(0.04)
-    pygame.mixer.music.play(-1)                                                 # Loop the music indefinitely
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Jojo Runner")
     clock = pygame.time.Clock()
