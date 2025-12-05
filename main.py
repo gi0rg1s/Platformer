@@ -3,7 +3,7 @@
 #Music and Sounds By Gibbo
 # ------- TO-DO ------
 # - background set-up
-# - character set-up - - almost done
+# - character set-up - - almost done yay
 # DINOUSAUR GAME FROM CHROME
 
 import pygame
