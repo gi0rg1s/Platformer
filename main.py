@@ -23,7 +23,7 @@ alive = True
 collision = False
 
 # -------------------- HITBOX CLASS --------------------
-class Hitbox:
+class Hitbox: 
     def __init__(self, x, y, width, height):
         # store size so we can re-center relative to the player each frame
         self.width = width
